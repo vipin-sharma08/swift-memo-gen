@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 
+const NAV_LINKS = [
+  { id: "how-it-works", label: "How It Works" },
+  { id: "features", label: "Features" },
+  { id: "about", label: "About" },
+];
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -18,60 +24,75 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-200"
       style={{
-        height: 52,
-        backdropFilter: scrolled ? "blur(20px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(20px)" : "none",
-        background: scrolled ? "hsla(0,0%,98%,0.85)" : "transparent",
-        borderBottom: scrolled ? "1px solid hsl(var(--border))" : "1px solid transparent",
+        height: 56,
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
+        background: scrolled ? "rgba(10, 10, 15, 0.8)" : "transparent",
+        borderBottom: scrolled
+          ? "1px solid rgba(255, 255, 255, 0.06)"
+          : "1px solid transparent",
       }}
     >
-      <div className="content-max flex h-[52px] items-center justify-between">
-        <button onClick={() => scrollTo("hero")} className="text-xl font-semibold text-foreground">
+      <div className="content-max flex h-[56px] items-center justify-between">
+        <button
+          onClick={() => scrollTo("hero")}
+          className="text-[18px] font-semibold text-text-primary tracking-[-0.02em]"
+        >
           MemoAI
         </button>
 
         {/* Desktop */}
         <div className="hidden items-center gap-8 md:flex">
-          {["how-it-works", "sample", "about"].map((id) => (
+          {NAV_LINKS.map(({ id, label }) => (
             <button
               key={id}
               onClick={() => scrollTo(id)}
-              className="text-[15px] text-muted-foreground transition-colors duration-200 hover:text-foreground"
+              className="text-[14px] text-text-secondary transition-colors duration-200 hover:text-text-primary"
             >
-              {id === "how-it-works" ? "How It Works" : id === "sample" ? "Sample" : "About"}
+              {label}
             </button>
           ))}
           <button
             onClick={() => scrollTo("hero")}
-            className="rounded-[10px] bg-primary px-4 py-2 text-[15px] font-medium text-primary-foreground transition-all duration-200 hover:brightness-110"
+            className="rounded-lg bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/85"
           >
             Try MemoAI
           </button>
         </div>
 
         {/* Mobile toggle */}
-        <button className="md:hidden text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+        <button
+          className="md:hidden text-text-primary"
+          onClick={() => setMobileOpen(!mobileOpen)}
+        >
+          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-background border-b border-border px-6 py-4 flex flex-col gap-4">
-          {["how-it-works", "sample", "about"].map((id) => (
+        <div
+          className="md:hidden px-6 py-4 flex flex-col gap-4"
+          style={{
+            background: "rgba(10, 10, 15, 0.95)",
+            backdropFilter: "blur(16px)",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          {NAV_LINKS.map(({ id, label }) => (
             <button
               key={id}
               onClick={() => scrollTo(id)}
-              className="text-left text-[15px] text-muted-foreground"
+              className="text-left text-[14px] text-text-secondary hover:text-text-primary"
             >
-              {id === "how-it-works" ? "How It Works" : id === "sample" ? "Sample" : "About"}
+              {label}
             </button>
           ))}
           <button
             onClick={() => scrollTo("hero")}
-            className="rounded-[10px] bg-primary px-4 py-2 text-[15px] font-medium text-primary-foreground w-fit"
+            className="rounded-lg bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground w-fit"
           >
             Try MemoAI
           </button>
