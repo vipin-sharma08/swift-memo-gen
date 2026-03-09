@@ -1,12 +1,25 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
+import HowItWorks from "@/components/HowItWorks";
+import FeaturesStrip from "@/components/FeaturesStrip";
+import SampleOutput from "@/components/SampleOutput";
+import SocialProof from "@/components/SocialProof";
+import CTASection from "@/components/CTASection";
+import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <HeroSection />
+      <HowItWorks />
+      <FeaturesStrip />
+      <SampleOutput />
+      <SocialProof />
+      <CTASection />
+      <Footer />
+      <ScrollToTop />
     </div>
   );
 };
