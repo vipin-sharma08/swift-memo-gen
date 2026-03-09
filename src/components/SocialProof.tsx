@@ -1,8 +1,12 @@
 const SocialProof = () => (
-  <section className="bg-secondary py-12">
+  <section
+    className="py-12"
+    style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+  >
     <div className="content-max text-center">
-      <p className="text-[15px] text-muted-foreground">
-        Built with data from leading financial APIs · Powered by Claude AI · Trusted by MBA students, analysts, and fund managers
+      <p className="text-[13px] text-text-tertiary">
+        Built with institutional-grade financial data · Powered by Claude AI ·
+        Used by analysts, fund managers, and MBA students
       </p>
     </div>
   </section>
