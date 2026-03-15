@@ -1,0 +1,894 @@
+{
+  "name": "MemoAI \u2014 Investment Memo Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-memo",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ce2e0bee-07bf-45fb-a3ff-8c71b690d721",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1296
+      ],
+      "webhookId": "3f91c97f-62b5-4ac9-aaa3-e55774752cdd"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.body?.company || '';\nconst company = raw.trim();\nif (!company || company.length < 2 || company.length > 120) {\n  return [{json: { valid: false, error: \"Please enter a valid company name.\" }}];\n}\nreturn [{json: { valid: true, company }}];"
+      },
+      "id": "3fea66fb-e64b-4292-8c7e-c70fa02f46e3",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        1296
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "={{ $json.valid }}",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "57ee3dce-070f-4402-8fc7-2a39d7922186",
+      "name": "Valid Input?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        1296
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"{{ $json.error }}\"\n}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "8d6b2d69-1f9c-437d-b9ff-40ad10ccff6e",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/stable/search-name?query={{ $json.company }}&apikey=DPP1Qyboqmhy5QH8sNli7mQMSOWhvXLX",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "58fe5357-915a-43d0-a0a0-c29819c7f6dc",
+      "name": "Search Ticker",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        672,
+        1392
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $json;\nconst arr = Array.isArray(results) ? results : [];\nif (arr.length === 0) {\n  return [{json: {found: false, isPublic: false, companyName: $('Validate Input').first().json.company}}];\n}\nconst best = arr[0];\nreturn [{json: {\n  found: true, isPublic: true,\n  ticker: best.symbol,\n  companyName: best.name || best.symbol,\n  exchange: best.exchangeShortName || 'N/A',\n  originalQuery: $('Validate Input').first().json.company\n}}];"
+      },
+      "id": "9bfd4fdd-1530-42ff-8703-e673453d58cb",
+      "name": "Resolve Ticker",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        1392
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "={{ $json.isPublic }}",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.isPublic }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8b6bb6cc-9b22-45e2-9748-38cdbf962a97",
+      "name": "Is Public Company?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        1392
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/stable/profile?symbol={{ $('Resolve Ticker').first().json.ticker }}&apikey=DPP1Qyboqmhy5QH8sNli7mQMSOWhvXLX",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "50ee1f2e-1aa1-469c-896b-cde81f47eb7f",
+      "name": "Get Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1344,
+        1200
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/stable/key-metrics-ttm?symbol={{ $('Resolve Ticker').first().json.ticker }}&apikey=DPP1Qyboqmhy5QH8sNli7mQMSOWhvXLX",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "469e23cd-4d4a-4207-bf05-c87b1073e74c",
+      "name": "Get Metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1344,
+        1392
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/stable/ratios-ttm?symbol={{ $('Resolve Ticker').first().json.ticker }}&apikey=DPP1Qyboqmhy5QH8sNli7mQMSOWhvXLX",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "0d21a134-ead7-4179-bc0c-4a2a89310d97",
+      "name": "Get Ratios",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1344,
+        1584
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/stable/quote?symbol={{ $('Resolve Ticker').first().json.ticker }}&apikey=DPP1Qyboqmhy5QH8sNli7mQMSOWhvXLX",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "3c975c82-e1e0-4cbe-a3fe-e8a4e5a08b64",
+      "name": "Get Quote",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1344,
+        1776
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://financialmodelingprep.com/stable/news?symbol={{ $('Resolve Ticker').first().json.ticker }}&limit=15&apikey=DPP1Qyboqmhy5QH8sNli7mQMSOWhvXLX",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "b15ea1a7-9332-4b2e-bfb3-dc2af411a5ba",
+      "name": "Get News",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1344,
+        1968
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "numberInputs": 5,
+        "mode": "append"
+      },
+      "id": "01ecc749-c389-4599-be49-bc6c3b9948ba",
+      "name": "Merge Financial Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1568,
+        1600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Assemble Payload: merge all financial data into a single structured object\nconst items = $input.all();\n\n// Helper to safely get first array element\nconst getFirst = (arr) => Array.isArray(arr) && arr.length > 0 ? arr[0] : {};\n\n// Extract data from each source\nconst profile = getFirst(items[0]?.json);\nconst metrics = getFirst(items[1]?.json);\nconst ratios = getFirst(items[2]?.json);\nconst quote = getFirst(items[3]?.json);\nconst newsArray = items[4]?.json || [];\n\n// Get ticker info from upstream\nconst tickerInfo = $('Resolve Ticker').first().json;\n\n// Format numbers for display\nconst fmt = (val, decimals = 2) => {\n  if (val === null || val === undefined || isNaN(val)) return 'N/A';\n  return Number(val).toFixed(decimals);\n};\n\nconst fmtBillion = (val) => {\n  if (val === null || val === undefined || isNaN(val)) return 'N/A';\n  return (val / 1e9).toFixed(2) + 'B';\n};\n\nconst fmtPercent = (val) => {\n  if (val === null || val === undefined || isNaN(val)) return 'N/A';\n  return (val * 100).toFixed(2) + '%';\n};\n\n// Analyze news sentiment\nconst analyzeSentiment = (newsItems) => {\n  if (!Array.isArray(newsItems) || newsItems.length === 0) {\n    return { score: 0, label: 'Neutral', summary: 'No recent news available.' };\n  }\n  \n  // Simple sentiment based on title keywords\n  let positiveCount = 0;\n  let negativeCount = 0;\n  \n  const positiveWords = ['surge', 'gain', 'profit', 'growth', 'beat', 'success', 'rise', 'up', 'high', 'strong'];\n  const negativeWords = ['fall', 'loss', 'decline', 'miss', 'weak', 'down', 'low', 'concern', 'risk', 'drop'];\n  \n  newsItems.forEach(item => {\n    const text = (item.title + ' ' + (item.text || '')).toLowerCase();\n    positiveWords.forEach(word => { if (text.includes(word)) positiveCount++; });\n    negativeWords.forEach(word => { if (text.includes(word)) negativeCount++; });\n  });\n  \n  const total = positiveCount + negativeCount;\n  const score = total === 0 ? 0 : (positiveCount - negativeCount) / total;\n  \n  let label = 'Neutral';\n  if (score > 0.2) label = 'Positive';\n  else if (score < -0.2) label = 'Negative';\n  \n  return {\n    score: fmt(score, 2),\n    label,\n    summary: `${newsItems.length} recent articles analyzed. Sentiment: ${label}.`\n  };\n};\n\nconst sentiment = analyzeSentiment(newsArray);\n\n// Build comprehensive payload\nconst payload = {\n  ticker: tickerInfo.ticker || 'N/A',\n  companyName: tickerInfo.companyName || profile.companyName || 'N/A',\n  exchange: tickerInfo.exchange || profile.exchangeShortName || 'N/A',\n  \n  profile: {\n    sector: profile.sector || 'N/A',\n    industry: profile.industry || 'N/A',\n    description: profile.description || 'No description available.',\n    ceo: profile.ceo || 'N/A',\n    website: profile.website || 'N/A',\n    employees: profile.fullTimeEmployees || 'N/A',\n    country: profile.country || 'N/A',\n    ipoDate: profile.ipoDate || 'N/A'\n  },\n  \n  quote: {\n    price: fmt(quote.price),\n    change: fmt(quote.change),\n    changePercent: fmtPercent(quote.changesPercentage / 100),\n    dayLow: fmt(quote.dayLow),\n    dayHigh: fmt(quote.dayHigh),\n    yearLow: fmt(quote.yearLow),\n    yearHigh: fmt(quote.yearHigh),\n    marketCap: fmtBillion(quote.marketCap),\n    volume: quote.volume || 'N/A',\n    avgVolume: quote.avgVolume || 'N/A',\n    previousClose: fmt(quote.previousClose)\n  },\n  \n  metrics: {\n    peRatio: fmt(metrics.peRatioTTM),\n    priceToBook: fmt(metrics.pbRatioTTM),\n    priceToSales: fmt(metrics.priceToSalesRatioTTM),\n    evToEbitda: fmt(metrics.enterpriseValueOverEBITDATTM),\n    roe: fmtPercent(metrics.roeTTM),\n    roa: fmtPercent(metrics.roaTTM),\n    debtToEquity: fmt(metrics.debtToEquityTTM),\n    currentRatio: fmt(metrics.currentRatioTTM),\n    dividendYield: fmtPercent(metrics.dividendYieldTTM)\n  },\n  \n  ratios: {\n    grossProfitMargin: fmtPercent(ratios.grossProfitMarginTTM),\n    operatingProfitMargin: fmtPercent(ratios.operatingProfitMarginTTM),\n    netProfitMargin: fmtPercent(ratios.netProfitMarginTTM),\n    returnOnEquity: fmtPercent(ratios.returnOnEquityTTM),\n    returnOnAssets: fmtPercent(ratios.returnOnAssetsTTM),\n    assetTurnover: fmt(ratios.assetTurnoverTTM),\n    inventoryTurnover: fmt(ratios.inventoryTurnoverTTM)\n  },\n  \n  news: newsArray.slice(0, 10).map(item => ({\n    title: item.title || 'No title',\n    publishedDate: item.publishedDate || 'N/A',\n    site: item.site || 'N/A',\n    url: item.url || '#'\n  })),\n  \n  sentiment: sentiment,\n  \n  generatedAt: new Date().toISOString()\n};\n\nreturn [{ json: payload }];"
+      },
+      "id": "d9f81b9a-f131-4456-a677-6da544b04571",
+      "name": "Assemble Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        1648
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_ANTHROPIC_API_KEY_HERE"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-6\",\n  \"max_tokens\": 4000,\n  \"temperature\": 0.3,\n  \"system\": \"You are a senior equity research analyst at a top-tier investment bank. You produce institutional-quality investment memos used by portfolio managers, fund committees, and LP presentations. Write with precision, analytical rigor, and specific data references. Never fabricate numbers \u2014 use only what is provided. If data is N/A, acknowledge the gap. Use a 5-tier recommendation system: CONVICTION BUY (strong thesis with clear catalysts), ACCUMULATE (positive but build gradually), HOLD (balanced risk/reward), MONITOR (concerning signals, watch closely), REDUCE (negative thesis, trim exposure).\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Generate a professional investment memo.\\n\\nCOMPANY: {{ $json.companyName }} ({{ $json.ticker }})\\nExchange: {{ $json.exchange }} | Sector: {{ $json.profile.sector }} | Industry: {{ $json.profile.industry }}\\nCountry: {{ $json.profile.country }} | CEO: {{ $json.profile.ceo }} | Employees: {{ $json.profile.employees }}\\nWebsite: {{ $json.profile.website }}\\n\\nMARKET DATA:\\nPrice: ${{ $json.quote.price }} ({{ $json.quote.changePercent }} today)\\nMarket Cap: {{ $json.quote.marketCap }}\\n52-Week: ${{ $json.quote.yearLow }} \u2014 ${{ $json.quote.yearHigh }}\\nVolume: {{ $json.quote.volume }} (Avg: {{ $json.quote.avgVolume }})\\n\\nVALUATION:\\nP/E: {{ $json.metrics.peRatio }} | EV/EBITDA: {{ $json.metrics.evToEbitda }} | P/B: {{ $json.metrics.priceToBook }}\\nROE: {{ $json.metrics.roe }} | ROA: {{ $json.metrics.roa }}\\n\\nPROFITABILITY:\\nGross Margin: {{ $json.ratios.grossProfitMargin }} | Operating: {{ $json.ratios.operatingProfitMargin }} | Net: {{ $json.ratios.netProfitMargin }}\\n\\nFINANCIAL HEALTH:\\nD/E: {{ $json.metrics.debtToEquity }} | Current Ratio: {{ $json.metrics.currentRatio }} | Div Yield: {{ $json.metrics.dividendYield }}\\n\\nSENTIMENT: {{ $json.sentiment.label }} (Score: {{ $json.sentiment.score }})\\n{{ $json.sentiment.summary }}\\n\\nRecent Headlines:\\n{{ $json.news.map(n => '- ' + n.title + ' (' + n.publishedDate + ')').join('\\\\n') }}\\n\\nDESCRIPTION:\\n{{ $json.profile.description }}\\n\\n=== GENERATE EXACTLY THESE 8 SECTIONS ===\\n\\n## 1. EXECUTIVE SUMMARY\\n3-4 sentences. State thesis clearly. End with RECOMMENDATION: [CONVICTION BUY / ACCUMULATE / HOLD / MONITOR / REDUCE] and 1-2 key catalysts.\\n\\n## 2. COMPANY OVERVIEW\\nBusiness model, key products/services, competitive moat (network effects, switching costs, scale, brand, IP), market positioning, unit economics if inferable.\\n\\n## 3. FINANCIAL DEEP-DIVE\\nInterpret ALL provided metrics. Compare to typical sector benchmarks. Flag strengths and red flags. Include a markdown table:\\n| Metric | Value | Sector Avg | Assessment |\\n(6 key metrics with Good/Neutral/Concerning in Assessment column)\\n\\n## 4. COMPETITIVE LANDSCAPE\\nIdentify 2-3 key competitors. How does this company differentiate? Market share dynamics. Is the moat widening or narrowing?\\n\\n## 5. RISK MATRIX\\nList 5 risks in a markdown table:\\n| Risk | Type | Likelihood | Impact |\\nType = Company / Sector / Macro. Likelihood and Impact = High / Medium / Low.\\n\\n## 6. NEWS SENTIMENT\\nAnalyze the sentiment data. What themes emerge from headlines? Near-term catalysts or headwinds? Is sentiment confirming or diverging from fundamentals?\\n\\n## 7. INVESTMENT THESIS\\nThree scenarios:\\n**Bull Case**: Best realistic outcome, indicative upside range\\n**Base Case**: Most likely path, key assumptions\\n**Bear Case**: Primary downside risks, indicative downside range\\n\\n## 8. KEY METRICS DASHBOARD\\nMarkdown table:\\n| Metric | Value | Assessment |\\n6 critical metrics. Assessment = Good / Neutral / Concerning.\\n\\nRULES: Use markdown. Bold key figures. 100-200 words per section. Reference exact numbers. End with: *This memo was generated by MemoAI using publicly available data and AI analysis. It does not constitute financial advice.*\"\n    }\n  ]\n}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "id": "7b116bea-dbf6-44e8-86f9-ae4221efc187",
+      "name": "Generate Memo (Claude)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2016,
+        1648
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": false, \"error\": \"AI generation failed. Please try again.\", \"retry\": true }",
+        "options": {
+          "responseCode": 500,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "702cf69c-1a16-4d76-a50d-bc854755f47b",
+      "name": "Return Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2240,
+        1744
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_ANTHROPIC_API_KEY_HERE"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-6\",\n  \"max_tokens\": 4000,\n  \"temperature\": 0.4,\n  \"system\": \"You are a senior venture capital analyst who evaluates startups and private companies for a top-tier VC fund. You produce professional investment memos for partner meetings. Use your training knowledge to provide the best analysis possible. Be transparent about data limitations. Use a 5-tier system: STRONG INTEREST (compelling opportunity), INTERESTED (worth pursuing), NEUTRAL (mixed signals), CAUTIOUS (significant concerns), PASS (does not meet criteria).\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Generate a professional VC-style investment memo for: {{ $json.companyName }}\\n\\nThis appears to be a private or unlisted company. Use your knowledge to provide the best analysis possible. If you have limited information, be transparent about it and focus on what is publicly known.\\n\\n=== GENERATE THESE 8 SECTIONS ===\\n\\n## 1. EXECUTIVE SUMMARY\\nWhat the company does, stage, and your recommendation: STRONG INTEREST / INTERESTED / NEUTRAL / CAUTIOUS / PASS. State key reasons.\\n\\n## 2. COMPANY OVERVIEW\\nBusiness model, product, target market, founding team (if known), funding history (if known), HQ location.\\n\\n## 3. MARKET OPPORTUNITY\\nTAM/SAM/SOM estimation. Market growth rate. Key tailwinds and headwinds. Is the timing right?\\n\\n## 4. COMPETITIVE LANDSCAPE\\n2-3 competitors. Differentiation. Defensibility. Moat potential.\\n\\n## 5. RISK MATRIX\\n| Risk | Type | Likelihood | Impact |\\n5 key risks. Type = Company / Market / Execution / Regulatory.\\n\\n## 6. TRACTION & SIGNALS\\nAny known metrics: users, revenue, growth rate, partnerships, media coverage. If unknown, state what signals to look for.\\n\\n## 7. INVESTMENT THESIS\\n**Bull Case**: What makes this a breakout company\\n**Base Case**: Reasonable path\\n**Bear Case**: What could go wrong\\n\\n## 8. KEY ASSESSMENT\\n| Factor | Rating | Notes |\\nRate each: Team, Market, Product, Timing, Competitive Position on a scale of Strong / Moderate / Weak.\\n\\nBe analytical and direct. End with: *This memo was generated by MemoAI using AI analysis of publicly available information. It does not constitute financial advice.*\"\n    }\n  ]\n}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "id": "7d7474a9-b5a8-4901-b1fe-40a3b73f2300",
+      "name": "Generate Startup Memo (Claude)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1264,
+        928
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const claude = $input.first().json;\nconst memo = claude.content[0].text;\nconst meta = $('Resolve Ticker').first().json;\nreturn [{json:{\n  success:true,\n  memo:{\n    type:'private',\n    content:memo,\n    company:meta.companyName,\n    ticker:null,\n    sector:'Private/Startup',\n    industry:'N/A',\n    price:null,\n    market_cap:null,\n    market_cap_formatted:null,\n    image:null,\n    sentiment:null,\n    recommendation_system:'vc_tier'\n  },\n  metadata:{\n    generated_at:new Date().toISOString(),\n    model:'claude-sonnet-4-6',\n    data_sources:['AI Knowledge Base','Public Information'],\n    note:'Limited data available for private companies. Analysis based on publicly known information.',\n    disclaimer:'Generated by MemoAI. Not financial advice.'\n  }\n}}];"
+      },
+      "id": "d8f4a77e-f349-4f95-91a5-42dd4c878f98",
+      "name": "Format Startup Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "3743c30e-b1f0-42d9-a98d-0b85343701fd",
+      "name": "Return Startup Memo",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1792,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const claude = $input.first().json;\nconst memo = claude.content[0].text;\nconst payload = $('Assemble Payload').first().json;\n\n// Extract recommendation from memo text\nconst extractRecommendation = (text) => {\n  const match = text.match(/RECOMMENDATION:\\s*(CONVICTION BUY|ACCUMULATE|HOLD|MONITOR|REDUCE)/i);\n  return match ? match[1].toUpperCase() : 'HOLD';\n};\n\nconst recommendation = extractRecommendation(memo);\n\nreturn [{json:{\n  success: true,\n  memo: {\n    type: 'public',\n    content: memo,\n    company: payload.companyName,\n    ticker: payload.ticker,\n    sector: payload.profile.sector,\n    industry: payload.profile.industry,\n    price: payload.quote.price,\n    market_cap: payload.quote.marketCap,\n    market_cap_formatted: payload.quote.marketCap,\n    image: null,\n    sentiment: payload.sentiment.label,\n    recommendation: recommendation,\n    recommendation_system: 'equity_tier'\n  },\n  metadata: {\n    generated_at: payload.generatedAt,\n    model: 'claude-sonnet-4-6',\n    data_sources: ['Financial Modeling Prep API', 'Market Data', 'News Sentiment'],\n    disclaimer: 'Generated by MemoAI. Not financial advice.'\n  }\n}}];"
+      },
+      "id": "eb57cabf-9771-4fbb-a60e-25fe2fbfb217",
+      "name": "Format Public Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        1552
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "96bff9ec-8d21-46ba-bb31-74d8f2c0e21a",
+      "name": "Return Public Memo",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2464,
+        1552
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const errorMsg = $input.first().json?.message || 'An unexpected error occurred.';\nreturn [{json:{\n  success:false,\n  error:errorMsg,\n  retry:true,\n  metadata:{generated_at:new Date().toISOString()}\n}}];"
+      },
+      "id": "65dce70c-6db8-4650-bd4a-78d091f6561c",
+      "name": "Error Fallback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 500,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "c9974f85-685e-4bff-9626-dd7c4aef1364",
+      "name": "Return Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2464,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "path": "generate-memo",
+        "options": {},
+        "httpMethod": "OPTIONS"
+      },
+      "id": "e9707bf4-00cc-4c49-899a-87ffaaf61acc",
+      "name": "CORS Preflight",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        752
+      ],
+      "webhookId": "1aa3baec-8ded-47be-bd95-5313f9c19a14"
+    },
+    {
+      "parameters": {
+        "respondWith": "noData",
+        "options": {
+          "responseCode": 204,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "2f1a3078-3278-477b-8e01-3e8c7e8dc2b6",
+      "name": "CORS Preflight Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        224,
+        752
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const errorMsg = $input.first().json?.message || 'Startup memo generation failed.';\nreturn [{json:{success:false, error:errorMsg, retry:true, metadata:{generated_at:new Date().toISOString()}}}];"
+      },
+      "id": "600fb0d2-a3f6-46ce-9951-36907de99bd9",
+      "name": "Startup Error Fallback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1744,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 500,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7d5dceeb-a4ff-40bc-a30c-bd2b23557913",
+      "name": "Return Startup Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        528
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Valid Input?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid Input?": {
+      "main": [
+        [
+          {
+            "node": "Search Ticker",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Ticker": {
+      "main": [
+        [
+          {
+            "node": "Resolve Ticker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Ticker": {
+      "main": [
+        [
+          {
+            "node": "Is Public Company?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Public Company?": {
+      "main": [
+        [
+          {
+            "node": "Get Profile",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Metrics",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Ratios",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Quote",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get News",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Startup Memo (Claude)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Profile": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Metrics": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Ratios": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial Data",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Get Quote": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial Data",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Get News": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial Data",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge Financial Data": {
+      "main": [
+        [
+          {
+            "node": "Assemble Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble Payload": {
+      "main": [
+        [
+          {
+            "node": "Generate Memo (Claude)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Memo (Claude)": {
+      "main": [
+        [
+          {
+            "node": "Format Public Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Startup Memo (Claude)": {
+      "main": [
+        [
+          {
+            "node": "Format Startup Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Startup Error Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Startup Response": {
+      "main": [
+        [
+          {
+            "node": "Return Startup Memo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Public Response": {
+      "main": [
+        [
+          {
+            "node": "Return Public Memo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Fallback": {
+      "main": [
+        [
+          {
+            "node": "Return Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CORS Preflight": {
+      "main": [
+        [
+          {
+            "node": "CORS Preflight Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Startup Error Fallback": {
+      "main": [
+        [
+          {
+            "node": "Return Startup Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5fbd9740-1b9e-4264-a4ae-21e777a635d4",
+  "meta": {
+    "instanceId": "17ced8e59472b5ff4eb31bdfabc5c7c4e74dc630d45c5b5631d87c0c511534c4"
+  },
+  "id": "KE6EbIu8VemFNU2R",
+  "tags": []
+}
