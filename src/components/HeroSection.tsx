@@ -31,7 +31,7 @@ const HeroSection = () => {
 
     try {
       const res = await fetch(
-        "https://vipinnn.app.n8n.cloud/webhook/generate-memo",
+        "https://vipinnn.app.n8n.cloud/webhook-test/generate-memo",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
