@@ -4,6 +4,7 @@ import HowItWorks from "@/components/HowItWorks";
 import FeaturesStrip from "@/components/FeaturesStrip";
 import SampleOutput from "@/components/SampleOutput";
 import SocialProof from "@/components/SocialProof";
+import TechStack from "@/components/TechStack";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -17,6 +18,7 @@ const Index = () => {
       <FeaturesStrip />
       <SampleOutput />
       <SocialProof />
+      <TechStack />
       <CTASection />
       <Footer />
       <ScrollToTop />
