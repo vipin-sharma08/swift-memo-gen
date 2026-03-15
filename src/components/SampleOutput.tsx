@@ -9,7 +9,7 @@ const SampleOutput = () => {
       <div className="content-max text-center">
         <p className="text-caption mb-3 reveal stagger-1">Sample Output</p>
         <h2 className="text-headline-section mb-12 reveal stagger-2">
-          See what analysts get.
+          See a sample memo.
         </h2>
         <div className="reveal stagger-3">
           <MemoResult company="Apple Inc." />

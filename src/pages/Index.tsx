@@ -18,6 +18,7 @@ const Index = () => {
       <FeaturesStrip />
       <SampleOutput />
       <SocialProof />
+      <TechStack />
       <CTASection />
       <Footer />
       <ScrollToTop />

@@ -16,7 +16,7 @@ const CTASection = () => {
           with 60 seconds.
         </h2>
         <p className="text-subheadline mb-10 reveal stagger-2">
-          Join hundreds of investors using AI to work smarter.
+          Built for analysts, fund managers, and MBA students.
         </p>
         <div className="reveal stagger-3">
           <button
