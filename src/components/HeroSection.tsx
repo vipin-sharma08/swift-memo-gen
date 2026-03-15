@@ -31,7 +31,7 @@ const HeroSection = () => {
 
     try {
       const res = await fetch(
-        "https://vipinnn.app.n8n.cloud/webhook/generate-memo",
+        "https://vipinnn.app.n8n.cloud/webhook-test/generate-memo",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -42,14 +42,14 @@ const HeroSection = () => {
 
       if (data.success) {
         setMemoData({
-          company: data.memo.company || company.trim(),
-          ticker: data.memo.ticker || "",
-          sector: data.memo.sector || "",
-          price: data.memo.price || "",
-          market_cap_formatted: data.memo.market_cap_formatted || "",
-          sentiment: data.memo.sentiment || "",
-          recommendation: data.memo.recommendation || "",
-          content: data.memo.content || "",
+          company: data.companyName || company.trim(),
+          ticker: data.ticker || "",
+          sector: data.profile?.sector || "",
+          price: data.quote?.price || "",
+          market_cap_formatted: data.quote?.marketCap || "",
+          sentiment: data.sentiment?.label || "",
+          recommendation: data.recommendation || "",
+          content: data.memo || "",
         });
         // Scroll to result after a tick
         setTimeout(() => {
