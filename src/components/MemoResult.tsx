@@ -7,17 +7,26 @@ interface MemoResultProps {
 }
 
 const RECOMMENDATION_COLORS: Record<string, string> = {
+  // Public company tiers
   "conviction buy": "hsl(var(--bullish))",
   accumulate: "hsl(var(--accent))",
   hold: "hsl(var(--neutral))",
   monitor: "hsl(var(--monitor))",
   reduce: "hsl(var(--bearish))",
+  // Startup / VC tiers
+  "strong interest": "hsl(var(--bullish))",
+  interested: "hsl(var(--accent))",
+  neutral: "hsl(var(--neutral))",
+  cautious: "hsl(var(--monitor))",
+  pass: "hsl(var(--bearish))",
 };
 
 const SENTIMENT_COLORS: Record<string, string> = {
   bullish: "hsl(var(--bullish))",
   "moderately bullish": "hsl(var(--bullish))",
+  positive: "hsl(var(--bullish))",
   neutral: "hsl(var(--neutral))",
+  negative: "hsl(var(--bearish))",
   bearish: "hsl(var(--bearish))",
   "moderately bearish": "hsl(var(--bearish))",
 };
@@ -59,7 +68,7 @@ const MemoResult = ({ company, data }: MemoResultProps) => {
           <div>
             <p className="text-caption mb-1">Investment Memo</p>
             <p className="text-[13px] text-[hsl(var(--text-tertiary))]">
-              Generated March 15, 2026
+              Generated {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
             </p>
           </div>
           <span className="text-[13px] font-medium text-[hsl(var(--text-tertiary))]">MemoAI</span>

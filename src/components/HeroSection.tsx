@@ -1,8 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Search } from "lucide-react";
 import MemoResult from "./MemoResult";
 import LoadingState from "./LoadingState";
 import ErrorState from "./ErrorState";
+
+const API_URL =
+  import.meta.env.VITE_WEBHOOK_URL ||
+  "https://vipinnn.app.n8n.cloud/webhook/generate-memo";
 
 const EXAMPLE_CHIPS = ["Apple", "Reliance Industries", "Stripe", "Zerodha"];
 
@@ -15,6 +19,15 @@ export interface MemoData {
   sentiment: string;
   recommendation: string;
   content: string;
+  type: "public" | "startup";
+}
+
+/** Extract VC-tier recommendation from startup memo text */
+function extractStartupRecommendation(text: string): string {
+  const match = text.match(
+    /(?:recommendation|verdict|assessment)[:\s]*(STRONG INTEREST|INTERESTED|NEUTRAL|CAUTIOUS|PASS)/i
+  );
+  return match ? match[1].toUpperCase() : "";
 }
 
 const HeroSection = () => {
@@ -30,30 +43,45 @@ const HeroSection = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "https://vipinnn.app.n8n.cloud/webhook/generate-memo",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ company: company.trim() }),
-        }
-      );
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company: company.trim() }),
+      });
       const data = await res.json();
 
       if (data.success) {
+        // Detect response shape: startup (nested memo object) vs public (flat)
+        const isStartup = typeof data.memo === "object" && data.memo !== null;
+
         setMemoData({
-          company: data.companyName || company.trim(),
-          ticker: data.ticker || "",
-          sector: data.profile?.sector || "",
-          price: data.quote?.price || "",
-          market_cap_formatted: data.quote?.marketCap || "",
-          sentiment: data.sentiment?.label || "",
-          recommendation: data.recommendation || "",
-          content: data.memo || "",
+          company: isStartup
+            ? data.memo.company || company.trim()
+            : data.companyName || company.trim(),
+          ticker: isStartup ? "" : data.ticker || "",
+          sector: isStartup
+            ? data.memo.sector || "Private / Startup"
+            : data.profile?.sector || "",
+          price: isStartup ? "" : data.quote?.price || "",
+          market_cap_formatted: isStartup
+            ? ""
+            : data.quote?.marketCap || "",
+          sentiment: isStartup
+            ? ""
+            : data.sentiment?.label || "",
+          recommendation: isStartup
+            ? extractStartupRecommendation(data.memo.content || "")
+            : data.recommendation || "",
+          content: isStartup
+            ? data.memo.content || ""
+            : data.memo || "",
+          type: isStartup ? "startup" : "public",
         });
-        // Scroll to result after a tick
+
         setTimeout(() => {
-          document.getElementById("memo-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          document
+            .getElementById("memo-result")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 100);
       } else {
         setError(true);
