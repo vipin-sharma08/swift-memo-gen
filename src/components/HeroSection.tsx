@@ -38,7 +38,8 @@ const HeroSection = () => {
           body: JSON.stringify({ company: company.trim() }),
         }
       );
-      const data = await res.json();
+      const raw = await res.json();
+const data = Array.isArray(raw) ? raw[0] : raw;
 
       if (data.success) {
         setMemoData({
