@@ -19,6 +19,26 @@ export interface MemoData {
 
 const WEBHOOK_URL = "https://vipinnn.app.n8n.cloud/webhook/generate-memo";
 
+const extractRecommendation = (memo: string): string => {
+  // Try to match "RECOMMENDATION: HOLD" or "RECOMMENDATION: 🟡 HOLD" patterns
+  const patterns = [
+    /RECOMMENDATION[:\s]+[🟡🟢🔴]?\s*([A-Z][A-Z\s]+?)(?:\n|$)/m,
+    /Rating[:\s]+[🟡🟢🔴]?\s*([A-Z][A-Z\s]+?)(?:\n|$)/m,
+    /We\s+(?:initiate|rate|recommend)\s+(?:coverage\s+at\s+)?([A-Z][A-Z\s]+?)(?:\.|,|\n)/m,
+  ];
+  for (const pattern of patterns) {
+    const match = memo.match(pattern);
+    if (match) {
+      const rec = match[1].trim().replace(/[*🟡🟢🔴]+/g, "").trim();
+      // Validate it's a known recommendation
+      const known = ["CONVICTION BUY", "ACCUMULATE", "HOLD", "MONITOR", "REDUCE"];
+      const found = known.find((k) => rec.toUpperCase().includes(k));
+      if (found) return found;
+    }
+  }
+  return "ACCUMULATE";
+};
+
 const HeroSection = () => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,11 +65,7 @@ const HeroSection = () => {
 
       if (!data || !data.memo) throw new Error("No memo in response");
 
-      // Extract recommendation from memo text
-      const recMatch = data.memo.match(/RECOMMENDATION[:\s*]+([A-Z\s]+)/i);
-      const recommendation = recMatch
-        ? recMatch[1].trim().replace(/\*+/g, "").trim()
-        : "ACCUMULATE";
+      const recommendation = extractRecommendation(data.memo);
 
       setMemoData({
         company: data.companyName || company.trim(),
