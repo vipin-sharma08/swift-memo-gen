@@ -38,13 +38,13 @@ const Navbar = () => {
       <div className="mx-auto max-w-[1100px] px-8 flex h-[56px] items-center justify-between">
         <button
           onClick={() => scrollTo("hero")}
-          className="text-[18px] font-semibold text-white tracking-[-0.02em] cursor-pointer"
+          className="text-[17px] font-bold text-white tracking-[-0.02em] cursor-pointer"
         >
           MemoAI
         </button>
 
         {/* Desktop */}
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-[32px] md:flex">
           {NAV_LINKS.map(({ id, label }) => (
             <button
               key={id}

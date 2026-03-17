@@ -84,7 +84,7 @@ const data = Array.isArray(raw) ? raw[0] : raw;
     <section
       id="hero"
       className="relative min-h-screen flex items-center justify-center"
-      style={{ background: "#080B14" }}
+      style={{ background: "#080B14", paddingTop: 96 }}
     >
       {/* Radial glow */}
       <div
@@ -104,14 +104,14 @@ const data = Array.isArray(raw) ? raw[0] : raw;
         </p>
 
         <h1
-          className="text-[clamp(48px,6vw,80px)] tracking-[-0.03em] leading-[1.1] reveal visible stagger-2"
+          className="text-[clamp(36px,4.8vw,68px)] tracking-[-0.03em] leading-[1.1] reveal visible stagger-2"
           style={{ marginBottom: 16 }}
         >
           <span className="font-bold text-white block">Company name in.</span>
           <span
             className="font-extrabold block"
             style={{
-              background: "linear-gradient(90deg, #fff 60%, #a89dff)",
+              background: "linear-gradient(90deg, #ffffff 40%, #a89dff 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -121,12 +121,12 @@ const data = Array.isArray(raw) ? raw[0] : raw;
         </h1>
 
         <p
-          className="mx-auto max-w-[480px] reveal visible stagger-3"
+          className="mx-auto max-w-[520px] reveal visible stagger-3"
           style={{
             fontSize: 17,
             lineHeight: 1.65,
             color: "#8B93A7",
-            marginBottom: 28,
+            marginBottom: 44,
           }}
         >
           Generate institutional-quality investment memos for public companies,
