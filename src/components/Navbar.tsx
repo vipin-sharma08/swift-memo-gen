@@ -38,7 +38,7 @@ const Navbar = () => {
       <div className="mx-auto max-w-[1100px] px-8 flex h-[56px] items-center justify-between">
         <button
           onClick={() => scrollTo("hero")}
-          className="text-[18px] font-semibold text-white tracking-[-0.02em] cursor-pointer"
+          className="text-[17px] font-bold text-white tracking-[-0.02em] cursor-pointer"
         >
           MemoAI
         </button>
