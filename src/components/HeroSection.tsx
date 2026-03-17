@@ -81,17 +81,54 @@ const data = Array.isArray(raw) ? raw[0] : raw;
   };
 
   return (
-    <section id="hero" className="hero-mesh relative min-h-screen flex items-center justify-center">
+    <section
+      id="hero"
+      className="relative min-h-screen flex items-center justify-center"
+      style={{ background: "#080B14" }}
+    >
+      {/* Radial glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 40% at 50% 30%, rgba(108,95,252,0.12) 0%, transparent 70%)",
+        }}
+      />
+
       <div className="w-full max-w-[720px] mx-auto px-4 text-center relative z-10">
-        <p className="text-[12px] font-medium uppercase tracking-[0.2em] text-white/40 reveal visible stagger-1 mb-4">
+        <p
+          className="text-[12px] font-medium uppercase reveal visible stagger-1"
+          style={{ letterSpacing: "0.05em", color: "#5B6EFF", marginBottom: 12 }}
+        >
           AI-Powered Investment Research
         </p>
-        <h1 className="text-[clamp(36px,5vw,64px)] font-bold tracking-[-0.03em] leading-[1.1] text-white reveal visible stagger-2 mb-5">
-          Company name in.
-          <br />
-          Investment memo out.
+
+        <h1
+          className="text-[clamp(48px,6vw,80px)] tracking-[-0.03em] leading-[1.1] reveal visible stagger-2"
+          style={{ marginBottom: 16 }}
+        >
+          <span className="font-bold text-white block">Company name in.</span>
+          <span
+            className="font-extrabold block"
+            style={{
+              background: "linear-gradient(90deg, #fff 60%, #a89dff)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Investment memo out.
+          </span>
         </h1>
-        <p className="text-[16px] leading-[1.6] text-white/50 mx-auto max-w-[520px] reveal visible stagger-3 mb-10">
+
+        <p
+          className="mx-auto max-w-[480px] reveal visible stagger-3"
+          style={{
+            fontSize: 17,
+            lineHeight: 1.65,
+            color: "#8B93A7",
+            marginBottom: 28,
+          }}
+        >
           Generate institutional-quality investment memos for public companies,
           private startups, and pre-IPO targets. Powered by Claude AI.
         </p>
@@ -100,27 +137,32 @@ const data = Array.isArray(raw) ? raw[0] : raw;
         <form
           onSubmit={handleSubmit}
           className="reveal visible stagger-4 w-full"
+          style={{ marginBottom: 20 }}
         >
           <div
-            className="relative flex items-center rounded-[14px] h-[56px] backdrop-blur-[20px] transition-all duration-200 focus-within:border-primary/40 focus-within:shadow-[0_0_0_3px_rgba(91,108,240,0.1)]"
+            className="relative flex items-center rounded-[14px] h-[56px] transition-all duration-200 focus-within:shadow-[0_0_0_3px_rgba(108,95,252,0.15)]"
             style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "#12162A",
+              border: "1px solid rgba(255,255,255,0.08)",
+              padding: "6px 6px 6px 16px",
             }}
           >
-            <Search className="absolute left-4 text-white/30" size={20} />
+            <Search className="shrink-0 mr-3" size={20} style={{ color: "rgba(255,255,255,0.3)" }} />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search any company... e.g. Apple, Flipkart, Stripe"
-              className="h-full w-full bg-transparent pl-12 pr-[140px] text-[15px] text-white placeholder:text-white/35 focus:outline-none"
+              className="h-full w-full bg-transparent text-[15px] text-white placeholder:text-white/35 focus:outline-none"
             />
             <button
               type="submit"
               disabled={loading}
-              className="absolute right-2 rounded-[10px] px-6 py-2.5 text-[14px] font-semibold text-white transition-all duration-200 hover:brightness-[1.15] hover:shadow-[0_0_16px_rgba(108,92,231,0.4)] disabled:opacity-60 cursor-pointer"
-              style={{ background: "#6C5CE7", height: 40 }}
+              className="shrink-0 rounded-[10px] text-[14px] font-medium text-white transition-all duration-150 hover:-translate-y-px active:scale-[0.97] disabled:opacity-60 cursor-pointer"
+              style={{
+                background: "#6C5FFC",
+                padding: "10px 22px",
+              }}
             >
               Generate
             </button>
@@ -129,15 +171,25 @@ const data = Array.isArray(raw) ? raw[0] : raw;
 
         {/* Chips */}
         {!loading && !error && (
-          <div className="mt-4 flex items-center justify-center gap-2.5 flex-wrap">
+          <div className="flex items-center justify-center gap-2.5 flex-wrap" style={{ marginBottom: 16 }}>
             {EXAMPLE_CHIPS.map((name) => (
               <button
                 key={name}
                 onClick={() => handleChip(name)}
-                className="rounded-[20px] px-[18px] py-2 text-[13px] font-medium text-white/60 transition-all duration-200 hover:text-white hover:border-[rgba(108,92,231,0.5)] hover:bg-white/10 cursor-pointer"
+                className="rounded-full text-[13px] font-normal transition-all duration-150 cursor-pointer hover:text-white"
                 style={{
-                  background: "rgba(255,255,255,0.06)",
+                  background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.1)",
+                  padding: "6px 16px",
+                  color: "#9CA3AF",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(108,95,252,0.4)";
+                  e.currentTarget.style.background = "rgba(108,95,252,0.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.04)";
                 }}
               >
                 {name}
@@ -147,8 +199,8 @@ const data = Array.isArray(raw) ? raw[0] : raw;
         )}
 
         {!loading && !error && (
-          <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-white/25 mt-8">
-            Free to use · No signup · Covers public and private companies
+          <p style={{ fontSize: 12, color: "#4B5563" }}>
+            Free to use / No signup / Public &amp; private companies
           </p>
         )}
 
