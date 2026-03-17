@@ -104,7 +104,7 @@ const data = Array.isArray(raw) ? raw[0] : raw;
         </p>
 
         <h1
-          className="text-[clamp(36px,4.8vw,68px)] tracking-[-0.03em] leading-[1.1] reveal visible stagger-2"
+          className="text-[clamp(28px,4.8vw,68px)] tracking-[-0.03em] leading-[1.1] reveal visible stagger-2"
           style={{ marginBottom: 16 }}
         >
           <span className="font-bold text-white block">Company name in.</span>
