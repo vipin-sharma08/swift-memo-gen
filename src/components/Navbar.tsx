@@ -44,7 +44,7 @@ const Navbar = () => {
         </button>
 
         {/* Desktop */}
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-[32px] md:flex">
           {NAV_LINKS.map(({ id, label }) => (
             <button
               key={id}
