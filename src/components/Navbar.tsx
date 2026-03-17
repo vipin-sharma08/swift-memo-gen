@@ -29,16 +29,16 @@ const Navbar = () => {
         height: 56,
         backdropFilter: scrolled ? "blur(16px)" : "none",
         WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
-        background: scrolled ? "rgba(10, 10, 15, 0.8)" : "transparent",
+        background: scrolled ? "rgba(8, 11, 20, 0.85)" : "transparent",
         borderBottom: scrolled
           ? "1px solid rgba(255, 255, 255, 0.06)"
           : "1px solid transparent",
       }}
     >
-      <div className="content-max flex h-[56px] items-center justify-between">
+      <div className="mx-auto max-w-[1100px] px-8 flex h-[56px] items-center justify-between">
         <button
           onClick={() => scrollTo("hero")}
-          className="text-[18px] font-semibold text-text-primary tracking-[-0.02em]"
+          className="text-[18px] font-semibold text-white tracking-[-0.02em] cursor-pointer"
         >
           MemoAI
         </button>
@@ -49,14 +49,18 @@ const Navbar = () => {
             <button
               key={id}
               onClick={() => scrollTo(id)}
-              className="text-[14px] text-text-secondary transition-colors duration-200 hover:text-text-primary"
+              className="text-[14px] font-normal cursor-pointer transition-colors duration-150"
+              style={{ color: "#888" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
             >
               {label}
             </button>
           ))}
           <button
             onClick={() => scrollTo("hero")}
-            className="rounded-lg bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/85"
+            className="rounded-[10px] px-5 py-3 text-[13px] font-medium text-white transition-all duration-150 hover:brightness-110 cursor-pointer"
+            style={{ background: "#6C5FFC" }}
           >
             Try MemoAI
           </button>
@@ -64,7 +68,7 @@ const Navbar = () => {
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden text-text-primary"
+          className="md:hidden text-white cursor-pointer"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
           {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -74,9 +78,9 @@ const Navbar = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div
-          className="md:hidden px-6 py-4 flex flex-col gap-4"
+          className="md:hidden px-8 py-4 flex flex-col gap-4"
           style={{
-            background: "rgba(10, 10, 15, 0.95)",
+            background: "rgba(8, 11, 20, 0.95)",
             backdropFilter: "blur(16px)",
             borderBottom: "1px solid rgba(255,255,255,0.06)",
           }}
@@ -85,14 +89,18 @@ const Navbar = () => {
             <button
               key={id}
               onClick={() => scrollTo(id)}
-              className="text-left text-[14px] text-text-secondary hover:text-text-primary"
+              className="text-left text-[14px] font-normal cursor-pointer transition-colors duration-150"
+              style={{ color: "#888" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
             >
               {label}
             </button>
           ))}
           <button
             onClick={() => scrollTo("hero")}
-            className="rounded-lg bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground w-fit"
+            className="rounded-[10px] px-5 py-3 text-[13px] font-medium text-white w-fit cursor-pointer"
+            style={{ background: "#6C5FFC" }}
           >
             Try MemoAI
           </button>
