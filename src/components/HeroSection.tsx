@@ -17,6 +17,8 @@ export interface MemoData {
   content: string;
 }
 
+const WEBHOOK_URL = "https://vipinnn.app.n8n.cloud/webhook/generate-memo";
+
 const HeroSection = () => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,35 +32,43 @@ const HeroSection = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "https://vipinnn.app.n8n.cloud/webhook/generate-memo",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ company: company.trim() })
-        }
-      );
+      const res = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company: company.trim() }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
       const raw = await res.json();
       const data = Array.isArray(raw) ? raw[0] : raw;
 
-      if (data.success) {
-        setMemoData({
-          company: data.companyName || company.trim(),
-          ticker: data.ticker || "",
-          sector: data.profile?.sector || "",
-          price: data.quote?.price || "",
-          market_cap_formatted: data.quote?.marketCap || "",
-          sentiment: data.sentiment?.label || "",
-          recommendation: data.recommendation || "",
-          content: data.memo || ""
-        });
-        // Scroll to result after a tick
-        setTimeout(() => {
-          document.getElementById("memo-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 100);
-      } else {
-        setError(true);
-      }
+      if (!data || !data.memo) throw new Error("No memo in response");
+
+      // Extract recommendation from memo text
+      const recMatch = data.memo.match(/RECOMMENDATION[:\s*]+([A-Z\s]+)/i);
+      const recommendation = recMatch
+        ? recMatch[1].trim().replace(/\*+/g, "").trim()
+        : "ACCUMULATE";
+
+      setMemoData({
+        company: data.companyName || company.trim(),
+        ticker: data.ticker || "",
+        sector: data.profile?.sector
+          ? `${data.profile.sector} · ${data.exchange || ""}`
+          : "",
+        price: data.quote?.price ? `$${data.quote.price}` : "",
+        market_cap_formatted: data.quote?.marketCap || "",
+        sentiment: data.sentiment?.label || "Neutral",
+        recommendation,
+        content: data.memo,
+      });
+
+      setTimeout(() => {
+        document
+          .getElementById("memo-result")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
     } catch {
       setError(true);
     } finally {
@@ -81,138 +91,89 @@ const HeroSection = () => {
   };
 
   return (
-    <section
-      id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-x-hidden"
-      style={{ background: "#080B14", paddingTop: 80 }}>
-      
-      {/* Radial glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-          "radial-gradient(ellipse 60% 40% at 50% 30%, rgba(108,95,252,0.12) 0%, transparent 70%)"
-        }} />
-
+    <section id="hero" className="hero-mesh relative min-h-screen flex items-center justify-center">
       <div className="w-full max-w-[720px] mx-auto px-4 text-center relative z-10">
-        <h1
-          className="text-[clamp(28px,4.8vw,68px)] tracking-[-0.03em] leading-[1.1] reveal visible stagger-2"
-          style={{ marginBottom: 16 }}>
-          <span className="font-bold text-white block">Company name in.</span>
-          <span
-            className="font-extrabold block"
-            style={{
-              background: "linear-gradient(90deg, #ffffff 30%, #a89dff 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent"
-            }}>
-            Investment memo out.
-          </span>
+        <p className="text-[12px] font-medium uppercase tracking-[0.2em] text-white/40 reveal visible stagger-1 mb-4">
+          AI-Powered Investment Research
+        </p>
+        <h1 className="text-[clamp(36px,5vw,64px)] font-bold tracking-[-0.03em] leading-[1.1] text-white reveal visible stagger-2 mb-5">
+          Company name in.
+          <br />
+          Investment memo out.
         </h1>
+        <p className="text-[16px] leading-[1.6] text-white/50 mx-auto max-w-[520px] reveal visible stagger-3 mb-10">
+          Generate institutional-quality investment memos for public companies,
+          private startups, and pre-IPO targets. Powered by Claude AI.
+        </p>
 
-        {/* Centered narrow column */}
-        <div className="flex flex-col items-center w-full" style={{ maxWidth: 560, margin: "0 auto" }}>
-          <p
-            className="text-[12px] font-medium uppercase reveal visible stagger-1"
-            style={{ letterSpacing: "0.05em", color: "#5B6EFF", marginBottom: 12, order: -1 }}>
-            AI-Powered Investment Research
-          </p>
-
-          <p
-            className="reveal visible stagger-3 font-normal text-center"
+        {/* Search bar */}
+        <form onSubmit={handleSubmit} className="reveal visible stagger-4 w-full">
+          <div
+            className="relative flex items-center rounded-[14px] h-[56px] backdrop-blur-[20px] transition-all duration-200 focus-within:border-primary/40 focus-within:shadow-[0_0_0_3px_rgba(91,108,240,0.1)]"
             style={{
-              fontSize: 16,
-              lineHeight: 1.7,
-              color: "#8B93A7",
-              marginBottom: 44,
-              maxWidth: 500
-            }}>
-            Generate institutional-quality investment memos for public companies, private startups, and pre-IPO targets. Powered by Claude AI.
-          </p>
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.1)",
+            }}
+          >
+            <Search className="absolute left-4 text-white/30" size={20} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search any company... e.g. Apple, Flipkart, Stripe"
+              className="h-full w-full bg-transparent pl-12 pr-[140px] text-[15px] text-white placeholder:text-white/35 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="absolute right-2 rounded-[10px] px-6 py-2.5 text-[14px] font-semibold text-white transition-all duration-200 hover:brightness-[1.15] hover:shadow-[0_0_16px_rgba(108,92,231,0.4)] disabled:opacity-60 cursor-pointer"
+              style={{ background: "#6C5CE7", height: 40 }}
+            >
+              {loading ? "Generating..." : "Generate"}
+            </button>
+          </div>
+        </form>
 
-          {/* Search bar */}
-          <form
-            onSubmit={handleSubmit}
-            className="reveal visible stagger-4 w-full"
-            style={{ marginBottom: 20 }}>
-            <div
-              className="relative flex items-center rounded-[12px] h-[56px] transition-all duration-200 focus-within:shadow-[0_0_0_3px_rgba(108,95,252,0.15)]"
-              style={{
-                background: "#12162A",
-                border: "1px solid rgba(255,255,255,0.08)",
-                padding: "12px 8px 12px 18px"
-              }}>
-              <Search className="shrink-0 mr-3" size={20} style={{ color: "rgba(255,255,255,0.3)" }} />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search any company... e.g. Apple, Flipkart, Stripe"
-                className="h-full w-full bg-transparent text-[15px] text-white placeholder:text-white/35 focus:outline-none" />
+        {/* Chips */}
+        {!loading && !error && (
+          <div className="mt-4 flex items-center justify-center gap-2.5 flex-wrap">
+            {EXAMPLE_CHIPS.map((name) => (
               <button
-                type="submit"
-                disabled={loading}
-                className="shrink-0 rounded-[9px] text-[14px] font-medium text-white transition-all duration-150 hover:-translate-y-px active:scale-[0.97] disabled:opacity-60 cursor-pointer"
+                key={name}
+                onClick={() => handleChip(name)}
+                className="rounded-[20px] px-[18px] py-2 text-[13px] font-medium text-white/60 transition-all duration-200 hover:text-white hover:border-[rgba(108,92,231,0.5)] hover:bg-white/10 cursor-pointer"
                 style={{
-                  background: "#6C5FFC",
-                  padding: "10px 24px"
-                }}>
-                Generate
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
+                {name}
               </button>
-            </div>
-          </form>
+            ))}
+          </div>
+        )}
 
-          {/* Chips */}
-          {!loading && !error &&
-            <div className="flex items-center justify-center gap-2 flex-wrap" style={{ marginBottom: 16 }}>
-              {EXAMPLE_CHIPS.map((name) =>
-                <button
-                  key={name}
-                  onClick={() => handleChip(name)}
-                  className="rounded-full text-[13px] font-normal transition-all duration-150 cursor-pointer hover:text-white flex items-center justify-center"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    padding: "6px 16px",
-                    color: "#9CA3AF",
-                    minWidth: 88
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(108,95,252,0.45)";
-                    e.currentTarget.style.background = "rgba(108,95,252,0.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-                    e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                  }}>
-                  {name}
-                </button>
-              )}
-            </div>
-          }
+        {!loading && !error && (
+          <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-white/25 mt-8">
+            Free to use · No signup · Covers public and private companies
+          </p>
+        )}
 
-          {!loading && !error &&
-            <p style={{ fontSize: 12, color: "#4B5563" }}>
-              Free to use / No signup / Public &amp; private companies
-            </p>
-          }
+        {/* Loading */}
+        {loading && <LoadingState />}
 
-          {/* Loading */}
-          {loading && <LoadingState />}
-
-          {/* Error */}
-          {error && !loading && <ErrorState onRetry={handleRetry} />}
-        </div>
+        {/* Error */}
+        {error && !loading && <ErrorState onRetry={handleRetry} />}
 
         {/* Result */}
-        {memoData && !loading && !error &&
+        {memoData && !loading && !error && (
           <div id="memo-result">
             <MemoResult data={memoData} />
           </div>
-        }
+        )}
       </div>
-    </section>);
-
+    </section>
+  );
 };
 
 export default HeroSection;
