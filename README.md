@@ -1,73 +1,61 @@
-# Welcome to your Lovable project
+# ⚡ Swift Memo Gen — Investment Memos in Under 60 Seconds
 
-## Project info
+> Type a company name. Get a full investment memo — financials, valuation, risk analysis, competitive positioning, recent news. All pulled live.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript) ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react) ![Status](https://img.shields.io/badge/status-live-brightgreen)
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## ✨ What It Does
 
-**Use Lovable**
+- **Live Financials** — Revenue, earnings, margins pulled in real-time via FMP API
+- **Valuation** — P/E, EV/EBITDA, DCF fair value estimate
+- **Risk Analysis** — Key risks flagged from recent news and financial data
+- **Competitive Positioning** — Market share, moat, peer comparison
+- **Recent News** — Latest headlines summarised and contextualised
+- **Full Memo Output** — Structured investment memo, ready to share
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+**Demo:** Apple, NVIDIA, Tesla, Walmart — four memos, back to back.
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 🚀 Quickstart
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+git clone https://github.com/vipin-sharma08/swift-memo-gen.git
+cd swift-memo-gen
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🛠️ Tech Stack
 
-**Use GitHub Codespaces**
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, Vite, Tailwind CSS, shadcn-ui |
+| AI Layer | Claude API (Anthropic) |
+| Automation | N8N workflows |
+| Financial Data | Financial Modelling Prep (FMP) API |
+| Builder | Lovable |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## 📁 Project Structure
 
-This project is built with:
+```
+swift-memo-gen/
+├── src/
+│   ├── components/      # Memo UI components
+│   ├── hooks/           # Data fetching hooks
+│   ├── lib/             # FMP API client & Claude integration
+│   └── pages/           # App routes
+└── package.json
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## 📝 License
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+MIT © [Vipin Sharma](https://github.com/vipin-sharma08)
