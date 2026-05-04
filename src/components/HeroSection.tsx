@@ -1,192 +1,45 @@
-import { useState, useCallback } from "react";
-import { Search } from "lucide-react";
-import MemoResult from "./MemoResult";
-import LoadingState from "./LoadingState";
-import ErrorState from "./ErrorState";
-
-const EXAMPLE_CHIPS = ["Apple", "Reliance Industries", "Stripe", "Zerodha"];
-
-export interface MemoData {
-  company: string;
-  ticker: string;
-  sector: string;
-  price: string;
-  market_cap_formatted: string;
-  sentiment: string;
-  recommendation: string;
-  content: string;
-}
-
-const WEBHOOK_URL = "https://vipinnn.app.n8n.cloud/webhook/generate-memo";
-
-const extractRecommendation = (memo: string): string => {
-  // Try to match "RECOMMENDATION: HOLD" or "RECOMMENDATION: 🟡 HOLD" patterns
-  const patterns = [
-    /RECOMMENDATION[:\s]+[🟡🟢🔴]?\s*([A-Z][A-Z\s]+?)(?:\n|$)/m,
-    /Rating[:\s]+[🟡🟢🔴]?\s*([A-Z][A-Z\s]+?)(?:\n|$)/m,
-    /We\s+(?:initiate|rate|recommend)\s+(?:coverage\s+at\s+)?([A-Z][A-Z\s]+?)(?:\.|,|\n)/m,
-  ];
-  for (const pattern of patterns) {
-    const match = memo.match(pattern);
-    if (match) {
-      const rec = match[1].trim().replace(/[*🟡🟢🔴]+/g, "").trim();
-      // Validate it's a known recommendation
-      const known = ["CONVICTION BUY", "ACCUMULATE", "HOLD", "MONITOR", "REDUCE"];
-      const found = known.find((k) => rec.toUpperCase().includes(k));
-      if (found) return found;
-    }
-  }
-  return "ACCUMULATE";
-};
+import MemoSearchForm from "./MemoSearchForm";
 
 const HeroSection = () => {
-  const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [memoData, setMemoData] = useState<MemoData | null>(null);
-
-  const generate = useCallback(async (company: string) => {
-    if (!company.trim()) return;
-    setMemoData(null);
-    setError(false);
-    setLoading(true);
-
-    try {
-      const res = await fetch(WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ company: company.trim() }),
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const raw = await res.json();
-      const data = Array.isArray(raw) ? raw[0] : raw;
-
-      if (!data || !data.memo) throw new Error("No memo in response");
-
-      const recommendation = extractRecommendation(data.memo);
-
-      setMemoData({
-        company: data.companyName || company.trim(),
-        ticker: data.ticker || "",
-        sector: data.profile?.sector
-          ? `${data.profile.sector} · ${data.exchange || ""}`
-          : "",
-        price: data.quote?.price ? `$${data.quote.price}` : "",
-        market_cap_formatted: data.quote?.marketCap || "",
-        sentiment: data.sentiment?.label || "Neutral",
-        recommendation,
-        content: data.memo,
-      });
-
-      setTimeout(() => {
-        document
-          .getElementById("memo-result")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    generate(query);
-  };
-
-  const handleChip = (name: string) => {
-    setQuery(name);
-    generate(name);
-  };
-
-  const handleRetry = () => {
-    if (query.trim()) generate(query);
-  };
-
   return (
-    <section id="hero" className="hero-mesh relative min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-[720px] mx-auto px-4 text-center relative z-10">
-        <p className="text-[12px] font-medium uppercase tracking-[0.2em] text-white/40 reveal visible stagger-1 mb-4">
-          AI-Powered Investment Research
-        </p>
-        <h1 className="text-[clamp(36px,5vw,64px)] font-bold tracking-[-0.03em] leading-[1.1] text-white reveal visible stagger-2 mb-5">
-          Company name in.
-          <br />
-          Investment memo out.
-        </h1>
-        <p className="text-[16px] leading-[1.6] text-white/50 mx-auto max-w-[520px] reveal visible stagger-3 mb-10">
-          Generate institutional-quality investment memos for public companies,
-          private startups, and pre-IPO targets. Powered by Claude AI.
-        </p>
-
-        {/* Search bar */}
-        <form onSubmit={handleSubmit} className="reveal visible stagger-4 w-full">
-          <div
-            className="relative flex items-center rounded-[14px] h-[56px] backdrop-blur-[20px] transition-all duration-200 focus-within:border-primary/40 focus-within:shadow-[0_0_0_3px_rgba(91,108,240,0.1)]"
-            style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)",
-            }}
+    <section
+      id="hero"
+      className="relative pt-32 md:pt-40 pb-32 md:pb-40 border-b border-rule"
+    >
+      <div className="max-w-page mx-auto px-6 sm:px-12 md:px-16">
+        <div className="max-w-[1000px]">
+          <p
+            className="label-eyebrow fade-up"
+            style={{ animationDelay: "0ms" }}
           >
-            <Search className="absolute left-4 text-white/30" size={20} />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search any company... e.g. Apple, Flipkart, Stripe"
-              className="h-full w-full bg-transparent pl-12 pr-[140px] text-[15px] text-white placeholder:text-white/35 focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="absolute right-2 rounded-[10px] px-6 py-2.5 text-[14px] font-semibold text-white transition-all duration-200 hover:brightness-[1.15] hover:shadow-[0_0_16px_rgba(108,92,231,0.4)] disabled:opacity-60 cursor-pointer"
-              style={{ background: "#6C5CE7", height: 40 }}
-            >
-              {loading ? "Generating..." : "Generate"}
-            </button>
-          </div>
-        </form>
-
-        {/* Chips */}
-        {!loading && !error && (
-          <div className="mt-4 flex items-center justify-center gap-2.5 flex-wrap">
-            {EXAMPLE_CHIPS.map((name) => (
-              <button
-                key={name}
-                onClick={() => handleChip(name)}
-                className="rounded-[20px] px-[18px] py-2 text-[13px] font-medium text-white/60 transition-all duration-200 hover:text-white hover:border-[rgba(108,92,231,0.5)] hover:bg-white/10 cursor-pointer"
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }}
-              >
-                {name}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-white/25 mt-8">
-            Free to use · No signup · Covers public and private companies
+            Issue 01 · Investment Research, Automated
           </p>
-        )}
 
-        {/* Loading */}
-        {loading && <LoadingState />}
+          <h1
+            className="display-hero mt-10 fade-up"
+            style={{ animationDelay: "80ms" }}
+          >
+            Company name in.
+            <br />
+            Investment memo out<span className="text-accent">.</span>
+          </h1>
 
-        {/* Error */}
-        {error && !loading && <ErrorState onRetry={handleRetry} />}
+          <p
+            className="font-serif italic text-[20px] leading-[1.5] text-ink-muted mt-10 max-w-[52ch] fade-up"
+            style={{ animationDelay: "160ms" }}
+          >
+            Generate institutional-quality investment memos for public
+            companies, private startups, and pre-IPO targets. Powered by Claude
+            AI.
+          </p>
 
-        {/* Result */}
-        {memoData && !loading && !error && (
-          <div id="memo-result">
-            <MemoResult data={memoData} />
+          <div
+            className="mt-14 fade-up"
+            style={{ animationDelay: "240ms" }}
+          >
+            <MemoSearchForm />
           </div>
-        )}
+        </div>
       </div>
     </section>
   );

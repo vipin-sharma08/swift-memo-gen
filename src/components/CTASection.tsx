@@ -1,34 +1,23 @@
-import { useScrollReveal } from "@/hooks/useScrollReveal";
-
 const CTASection = () => {
-  const ref = useScrollReveal();
-
   const scrollToHero = () => {
     document.getElementById("hero")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <section id="about" className="section-padding" ref={ref}>
-      <div className="content-max text-center">
-        <h2 className="text-headline-section mb-4 reveal stagger-1">
-          Replace 4 hours of research
-          <br />
-          with 60 seconds.
+    <section
+      id="about"
+      className="py-32 md:py-[200px] border-b border-rule"
+    >
+      <div className="max-w-page mx-auto px-6 sm:px-12 md:px-16">
+        <h2 className="font-serif text-[clamp(36px,5vw,48px)] font-normal leading-[1.05] tracking-[-0.015em] text-ink">
+          Generate your first memo<span className="text-accent">.</span>
         </h2>
-        <p className="text-subheadline mb-10 reveal stagger-2">
-          Built for analysts, fund managers, and MBA students.
-        </p>
-        <div className="reveal stagger-3">
-          <button
-            onClick={scrollToHero}
-            className="rounded-xl bg-primary px-8 py-4 text-[15px] font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/85"
-          >
-            Generate Your First Memo
-          </button>
-        </div>
-        <p className="text-caption mt-5 reveal stagger-4">
-          No signup · No credit card · Public and private companies
-        </p>
+        <button
+          onClick={scrollToHero}
+          className="ui-link mt-6 font-sans text-[15px] font-medium tracking-wide"
+        >
+          Start now →
+        </button>
       </div>
     </section>
   );

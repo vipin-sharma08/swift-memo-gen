@@ -1,63 +1,62 @@
-import { useScrollReveal } from "@/hooks/useScrollReveal";
-
 const features = [
   {
     title: "Executive Summary",
-    desc: "Thesis, recommendation tier (Conviction Buy / Accumulate / Hold / Monitor / Reduce), and key catalysts",
+    desc: "Thesis, recommendation tier (Conviction Buy / Accumulate / Hold / Monitor / Reduce), and key catalysts.",
   },
   {
     title: "Company Overview",
-    desc: "Business model analysis, competitive moat, market positioning, and unit economics",
+    desc: "Business model analysis, competitive moat, market positioning, and unit economics.",
   },
   {
     title: "Financial Deep-Dive",
-    desc: "Margins, valuations, peer benchmarks, and growth trajectory",
+    desc: "Margins, valuations, peer benchmarks, and growth trajectory.",
   },
   {
     title: "Competitive Landscape",
-    desc: "2-3 key competitors with differentiation analysis",
+    desc: "Two to three key competitors with differentiation analysis.",
   },
   {
     title: "Risk Matrix",
-    desc: "Company, sector, and macro risks ranked by probability and impact",
+    desc: "Company, sector, and macro risks ranked by probability and impact.",
   },
   {
     title: "News Sentiment",
-    desc: "AI-scored sentiment from recent headlines with bullish/bearish signals",
+    desc: "AI-scored sentiment from recent headlines with bullish and bearish signals.",
   },
   {
     title: "Investment Thesis",
-    desc: "Bull, base, and bear scenarios with indicative range",
+    desc: "Bull, base, and bear scenarios with indicative range.",
   },
   {
     title: "Key Metrics Dashboard",
-    desc: "6 critical metrics with Good/Neutral/Concerning assessment",
+    desc: "Six critical metrics with Good / Neutral / Concerning assessment.",
   },
 ];
 
 const FeaturesStrip = () => {
-  const ref = useScrollReveal();
-
   return (
-    <section id="features" className="section-padding" ref={ref}>
-      <div className="content-max">
-        <p className="text-caption mb-3 reveal stagger-1">
-          What's Inside Every Memo
-        </p>
-        <h2 className="text-headline-section mb-14 reveal stagger-2">
-          Eight sections. Zero fluff.
-        </h2>
+    <section
+      id="features"
+      className="py-32 md:py-40 border-b border-rule"
+    >
+      <div className="max-w-page mx-auto px-6 sm:px-12 md:px-16">
+        <p className="label-eyebrow">What's Inside Every Memo</p>
+        <h2 className="display-section mt-6">Eight sections. Zero fluff.</h2>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-14">
           {features.map((f, i) => (
             <div
               key={f.title}
-              className={`border-t-2 border-primary pt-5 reveal stagger-${(i % 4) + 1}`}
+              className={`${i >= 4 ? "lg:pt-14 lg:border-t lg:border-rule" : ""}`}
             >
-              <h3 className="text-[15px] font-semibold text-text-primary mb-2">
+              <p className="font-mono text-[14px] tracking-[0.1em] text-ink-faint">
+                {String(i + 1).padStart(2, "0")}
+              </p>
+              <hr className="border-0 border-t border-rule mt-3 mb-5" />
+              <h3 className="font-serif text-[22px] leading-[1.2] text-ink">
                 {f.title}
               </h3>
-              <p className="text-[13px] text-text-secondary leading-relaxed">
+              <p className="font-sans text-[15px] leading-[1.55] text-ink-muted mt-3 max-w-[32ch]">
                 {f.desc}
               </p>
             </div>

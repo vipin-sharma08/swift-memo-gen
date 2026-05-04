@@ -1,7 +1,6 @@
 import type { Config } from "tailwindcss";
 
 export default {
-  darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
   theme: {
@@ -9,11 +8,34 @@ export default {
       center: true,
       padding: "2rem",
       screens: {
-        "2xl": "1400px",
+        "2xl": "1240px",
       },
     },
     extend: {
+      fontFamily: {
+        serif: ['"Fraunces"', "ui-serif", "Georgia", "serif"],
+        sans: ['"Inter Tight"', "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ['"JetBrains Mono"', "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+      },
       colors: {
+        // Editorial palette
+        bg: "hsl(var(--bg))",
+        "bg-elevated": "hsl(var(--bg-elevated))",
+        ink: {
+          DEFAULT: "hsl(var(--ink))",
+          muted: "hsl(var(--ink-muted))",
+          faint: "hsl(var(--ink-faint))",
+        },
+        rule: "hsl(var(--rule))",
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          soft: "hsl(var(--accent-soft))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        success: "hsl(var(--success))",
+        warn: "hsl(var(--warn))",
+
+        // shadcn legacy mappings — needed by Toaster, Sonner, Tooltip, Progress.
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -31,21 +53,9 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
-        success: {
-          DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
-        },
-        warning: {
-          DEFAULT: "hsl(var(--warning))",
-          foreground: "hsl(var(--warning-foreground))",
-        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -55,31 +65,16 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        "surface-elevated": "hsl(var(--surface-elevated))",
-        "surface-higher": "hsl(var(--surface-higher))",
-        "surface-highest": "hsl(var(--surface-highest))",
-        "text-primary": "hsl(var(--text-primary))",
-        "text-secondary": "hsl(var(--text-secondary))",
-        "text-tertiary": "hsl(var(--text-tertiary))",
-        bullish: "hsl(var(--bullish))",
-        bearish: "hsl(var(--bearish))",
-        neutral: "hsl(var(--neutral))",
-        monitor: "hsl(var(--monitor))",
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "var(--radius)",
+        sm: "var(--radius)",
+      },
+      maxWidth: {
+        prose: "68ch",
+        memo: "720px",
+        page: "1240px",
       },
       keyframes: {
         "accordion-down": {

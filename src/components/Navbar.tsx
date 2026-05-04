@@ -1,21 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
   { id: "how-it-works", label: "How It Works" },
   { id: "features", label: "Features" },
-  { id: "built-with", label: "About" },
+  { id: "about", label: "About" },
 ];
 
 const Navbar = () => {
-  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const scrollTo = (id: string) => {
     setMobileOpen(false);
@@ -23,84 +16,56 @@ const Navbar = () => {
   };
 
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-200"
-      style={{
-        height: 56,
-        backdropFilter: scrolled ? "blur(16px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
-        background: scrolled ? "rgba(8, 11, 20, 0.85)" : "transparent",
-        borderBottom: scrolled
-          ? "1px solid rgba(255, 255, 255, 0.06)"
-          : "1px solid transparent",
-      }}
-    >
-      <div className="mx-auto max-w-[1100px] px-8 flex h-[56px] items-center justify-between">
+    <nav className="border-b border-rule" style={{ backgroundColor: "hsl(var(--bg))" }}>
+      <div className="max-w-page mx-auto px-6 sm:px-12 md:px-16 flex h-16 items-center justify-between">
         <button
           onClick={() => scrollTo("hero")}
-          className="text-[17px] font-bold text-white tracking-[-0.02em] cursor-pointer"
+          className="font-sans text-[18px] font-medium text-ink tracking-tight"
         >
           MemoAI
         </button>
 
-        {/* Desktop */}
-        <div className="hidden items-center gap-[32px] md:flex">
+        <div className="hidden md:flex items-center gap-10">
           {NAV_LINKS.map(({ id, label }) => (
             <button
               key={id}
               onClick={() => scrollTo(id)}
-              className="text-[14px] font-normal cursor-pointer transition-colors duration-150"
-              style={{ color: "#888" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+              className="font-sans text-[14px] text-ink-muted hover:text-ink transition-colors duration-150"
             >
               {label}
             </button>
           ))}
           <button
             onClick={() => scrollTo("hero")}
-            className="rounded-[10px] px-5 py-3 text-[13px] font-medium text-white transition-all duration-150 hover:brightness-110 cursor-pointer"
-            style={{ background: "#6C5FFC" }}
+            className="ui-link font-sans text-[14px] font-medium"
           >
             Try MemoAI
           </button>
         </div>
 
-        {/* Mobile toggle */}
         <button
-          className="md:hidden text-white cursor-pointer"
+          className="md:hidden text-ink"
           onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
-      {/* Mobile menu */}
       {mobileOpen && (
-        <div
-          className="md:hidden px-8 py-4 flex flex-col gap-4"
-          style={{
-            background: "rgba(8, 11, 20, 0.95)",
-            backdropFilter: "blur(16px)",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-          }}
-        >
+        <div className="md:hidden border-t border-rule px-6 py-6 flex flex-col gap-5">
           {NAV_LINKS.map(({ id, label }) => (
             <button
               key={id}
               onClick={() => scrollTo(id)}
-              className="text-left text-[14px] font-normal cursor-pointer transition-colors duration-150"
-              style={{ color: "#888" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+              className="text-left font-sans text-[14px] text-ink-muted hover:text-ink transition-colors"
             >
               {label}
             </button>
           ))}
           <button
             onClick={() => scrollTo("hero")}
-            className="rounded-[10px] px-5 py-3 text-[13px] font-medium text-white w-fit cursor-pointer"
-            style={{ background: "#6C5FFC" }}
+            className="ui-link self-start font-sans text-[14px] font-medium"
           >
             Try MemoAI
           </button>
