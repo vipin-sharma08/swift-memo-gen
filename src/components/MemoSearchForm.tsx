@@ -106,19 +106,19 @@ const MemoSearchForm = () => {
   return (
     <div className="w-full">
       <form onSubmit={handleSubmit} className="max-w-[640px]">
-        <div className="flex items-end gap-6 border-b border-ink pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 border-b border-ink pb-3">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="A company name or ticker"
             disabled={loading}
-            className="flex-1 bg-transparent border-0 outline-none font-serif text-[20px] text-ink placeholder:text-ink-faint disabled:opacity-50"
+            className="sm:flex-1 bg-transparent border-0 outline-none font-serif text-[18px] sm:text-[20px] text-ink placeholder:text-ink-faint disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={loading || !query.trim()}
-            className="ui-link font-sans text-[14px] font-medium tracking-wide whitespace-nowrap pb-1 disabled:opacity-40 disabled:pointer-events-none"
+            className="ui-link self-start sm:self-auto font-sans text-[14px] font-medium tracking-wide whitespace-nowrap pb-1 disabled:opacity-40 disabled:pointer-events-none"
           >
             {loading ? "Generating…" : "Generate →"}
           </button>

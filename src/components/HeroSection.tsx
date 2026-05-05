@@ -4,7 +4,7 @@ const HeroSection = () => {
   return (
     <section
       id="hero"
-      className="relative pt-32 md:pt-40 pb-32 md:pb-40 border-b border-rule"
+      className="relative pt-20 md:pt-40 pb-24 md:pb-40 border-b border-rule"
     >
       <div className="max-w-page mx-auto px-6 sm:px-12 md:px-16">
         <div className="max-w-[1000px]">
@@ -16,7 +16,7 @@ const HeroSection = () => {
           </p>
 
           <h1
-            className="display-hero mt-10 fade-up"
+            className="display-hero mt-8 md:mt-10 fade-up"
             style={{ animationDelay: "80ms" }}
           >
             Company name in.
@@ -25,7 +25,7 @@ const HeroSection = () => {
           </h1>
 
           <p
-            className="font-serif italic text-[20px] leading-[1.5] text-ink-muted mt-10 max-w-[52ch] fade-up"
+            className="font-serif italic text-[17px] md:text-[20px] leading-[1.5] text-ink-muted mt-8 md:mt-10 max-w-[52ch] fade-up"
             style={{ animationDelay: "160ms" }}
           >
             Generate institutional-quality investment memos for public
@@ -34,7 +34,7 @@ const HeroSection = () => {
           </p>
 
           <div
-            className="mt-14 fade-up"
+            className="mt-10 md:mt-14 fade-up"
             style={{ animationDelay: "240ms" }}
           >
             <MemoSearchForm />
