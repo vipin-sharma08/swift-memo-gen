@@ -113,7 +113,7 @@ const MemoSearchForm = () => {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="A company name or ticker"
             disabled={loading}
-            className="sm:flex-1 bg-transparent border-0 outline-none font-serif text-[18px] sm:text-[20px] text-ink placeholder:text-ink-faint disabled:opacity-50"
+            className="sm:flex-1 bg-transparent border-0 outline-none focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 font-serif text-[18px] sm:text-[20px] text-ink placeholder:text-ink-faint disabled:opacity-50"
           />
           <button
             type="submit"
@@ -148,7 +148,7 @@ const MemoSearchForm = () => {
       )}
 
       {!loading && !error && (
-        <p className="mt-10 label-eyebrow text-[10px] text-ink-faint">
+        <p className="mt-10 label-eyebrow text-[10px] text-ink-muted">
           Free to use · No signup · Covers public and private companies
         </p>
       )}

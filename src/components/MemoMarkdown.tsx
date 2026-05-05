@@ -88,12 +88,12 @@ const MemoMarkdown = ({ content }: MemoMarkdownProps) => {
           key={key++}
           className="flex items-center gap-4 mt-16 mb-6 first:mt-0"
         >
-          <span className="font-mono text-[14px] text-ink-faint tracking-wider">
+          <span className="font-mono text-[14px] text-ink-faint tracking-wider" aria-hidden="true">
             {num}
           </span>
-          <span className="label-eyebrow text-ink whitespace-nowrap">
+          <h2 className="label-eyebrow text-ink whitespace-nowrap">
             {trimmed.slice(3)}
-          </span>
+          </h2>
           <div className="flex-1 border-t border-rule" aria-hidden="true" />
         </header>,
       );
@@ -103,12 +103,12 @@ const MemoMarkdown = ({ content }: MemoMarkdownProps) => {
         inList = false;
       }
       elements.push(
-        <h4
+        <h3
           key={key++}
           className="font-serif text-[20px] leading-[1.25] text-ink mt-8 mb-3"
         >
           {trimmed.slice(4)}
-        </h4>,
+        </h3>,
       );
     } else if (/^\d+\.\s/.test(trimmed)) {
       inList = true;

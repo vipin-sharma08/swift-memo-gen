@@ -32,6 +32,11 @@ const LoadingState = () => {
         <div className="flex-1 h-px bg-rule relative overflow-hidden">
           <div
             className="absolute inset-y-0 left-0 bg-accent transition-[width] duration-75 ease-linear"
+            role="progressbar"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Memo generation progress"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -39,10 +44,12 @@ const LoadingState = () => {
       <p
         key={msgIndex}
         className="mt-4 font-sans text-[14px] text-ink-muted fade-up"
+        aria-live="polite"
+        aria-atomic="true"
       >
         {LOADING_MESSAGES[msgIndex]}…
       </p>
-      <p className="mt-2 font-sans text-[12px] text-ink-faint">
+      <p className="mt-2 font-sans text-[12px] text-ink-muted">
         This usually takes 30–60 seconds.
       </p>
     </div>

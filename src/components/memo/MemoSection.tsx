@@ -10,12 +10,12 @@ const MemoSection = ({ number, label, children }: MemoSectionProps) => {
   return (
     <section className="mt-16">
       <header className="flex items-center gap-4 mb-6">
-        <span className="font-mono text-[14px] text-ink-faint tracking-wider">
+        <span className="font-mono text-[14px] text-ink-faint tracking-wider" aria-hidden="true">
           {number}
         </span>
-        <span className="label-eyebrow text-ink whitespace-nowrap">
+        <h2 className="label-eyebrow text-ink whitespace-nowrap">
           {label}
-        </span>
+        </h2>
         <div className="flex-1 border-t border-rule" aria-hidden="true" />
       </header>
       {children}

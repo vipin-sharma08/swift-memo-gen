@@ -3,7 +3,7 @@ interface ErrorStateProps {
 }
 
 const ErrorState = ({ onRetry }: ErrorStateProps) => (
-  <div className="mt-12 max-w-[640px]">
+  <div className="mt-12 max-w-[640px]" role="alert">
     <p className="label-eyebrow text-warn">Error</p>
     <hr className="border-0 border-t border-rule mt-2 mb-4" />
     <p className="font-serif text-[17px] leading-[1.6] text-ink">

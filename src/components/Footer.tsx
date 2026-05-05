@@ -92,11 +92,11 @@ const Footer = () => (
       <hr className="border-0 border-t border-rule mt-16 mb-8" />
 
       <div className="flex flex-col md:flex-row md:items-baseline md:justify-between gap-4">
-        <p className="font-sans text-[12px] text-ink-faint leading-[1.6] max-w-[68ch]">
+        <p className="font-sans text-[12px] text-ink-muted leading-[1.6] max-w-[68ch]">
           MemoAI generates research for informational purposes only. Not
           investment advice. Verify all figures independently.
         </p>
-        <p className="font-sans text-[12px] text-ink-faint whitespace-nowrap">
+        <p className="font-sans text-[12px] text-ink-muted whitespace-nowrap">
           © 2026 MemoAI
         </p>
       </div>

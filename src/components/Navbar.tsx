@@ -16,7 +16,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="border-b border-rule" style={{ backgroundColor: "hsl(var(--bg))" }}>
+    <nav className="border-b border-rule" aria-label="Main navigation" style={{ backgroundColor: "hsl(var(--bg))" }}>
       <div className="max-w-page mx-auto px-6 sm:px-12 md:px-16 flex h-16 items-center justify-between">
         <button
           onClick={() => scrollTo("hero")}
@@ -47,6 +47,7 @@ const Navbar = () => {
           className="md:hidden text-ink"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
         >
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>

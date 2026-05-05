@@ -16,6 +16,7 @@ const MemoTable = ({ headers, rows, alignments }: MemoTableProps) => {
           {headers.map((h, i) => (
             <th
               key={i}
+              scope="col"
               className={`label-eyebrow py-3 px-3 first:pl-0 last:pr-0 border-b border-rule ${
                 alignFor(i) === "right" ? "text-right" : "text-left"
               }`}
