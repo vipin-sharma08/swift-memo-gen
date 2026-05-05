@@ -1,1 +1,30 @@
-{"functions":{"api/generate-memo.js":{"maxDuration":120}},"rewrites":[{"source":"/api/(.*)","destination":"/api/$1"},{"source":"/(.*)","destination":"/index.html"}]}
+{
+  "functions": {
+    "api/generate-memo.ts": {
+      "maxDuration": 300
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/((?!api/|src/|@vite/|@react-refresh|node_modules/|@id/|@fs/).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" }
+      ]
+    }
+  ]
+}

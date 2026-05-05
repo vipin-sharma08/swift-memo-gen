@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import MemoResult from "./MemoResult";
 import LoadingState from "./LoadingState";
 import ErrorState from "./ErrorState";
+import type { PartialMemo } from "@/types/memo";
 
 export interface MemoData {
   company: string;
@@ -12,76 +13,132 @@ export interface MemoData {
   sentiment: string;
   recommendation: string;
   content: string;
+  type: "public" | "startup";
 }
 
 const EXAMPLE_CHIPS = ["Apple", "Reliance Industries", "Stripe", "Zerodha"];
 
-const WEBHOOK_URL = "https://vipinnn.app.n8n.cloud/webhook/generate-memo";
+const API_URL = "/api/generate-memo";
 
-const extractRecommendation = (memo: string): string => {
-  const patterns = [
-    /RECOMMENDATION[:\s]+[🟡🟢🔴]?\s*([A-Z][A-Z\s]+?)(?:\n|$)/m,
-    /Rating[:\s]+[🟡🟢🔴]?\s*([A-Z][A-Z\s]+?)(?:\n|$)/m,
-    /We\s+(?:initiate|rate|recommend)\s+(?:coverage\s+at\s+)?([A-Z][A-Z\s]+?)(?:\.|,|\n)/m,
-  ];
-  for (const pattern of patterns) {
-    const match = memo.match(pattern);
-    if (match) {
-      const rec = match[1].trim().replace(/[*🟡🟢🔴]+/g, "").trim();
-      const known = ["CONVICTION BUY", "ACCUMULATE", "HOLD", "MONITOR", "REDUCE"];
-      const found = known.find((k) => rec.toUpperCase().includes(k));
-      if (found) return found;
-    }
-  }
-  return "ACCUMULATE";
-};
+// ── Convert streaming PartialMemo → MemoData for MemoResult ──────────────────
+
+function buildContent(memo: PartialMemo): string {
+  const s = (memo.sections ?? {}) as NonNullable<PartialMemo["sections"]>;
+  return [
+    s.executiveSummary && `## Executive Summary\n${s.executiveSummary}`,
+    s.companyOverview && `## Company Overview\n${s.companyOverview}`,
+    s.financialDeepDive && `## Financial Analysis\n${s.financialDeepDive}`,
+    s.competitiveLandscape && `## Competitive Landscape\n${s.competitiveLandscape}`,
+    s.riskMatrix && `## Risk Matrix\n${s.riskMatrix}`,
+    s.newsSentiment && `## News Sentiment\n${s.newsSentiment}`,
+    s.investmentThesis && `## Investment Thesis\n${s.investmentThesis}`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+function memoToMemoData(memo: PartialMemo, fallbackQuery: string): MemoData {
+  const md = memo.marketData;
+  const ticker = memo.ticker ?? "";
+  const isInr = ticker.endsWith(".NS") || ticker.endsWith(".BO");
+  const curr = isInr ? "₹" : "$";
+
+  const price =
+    md?.price != null
+      ? `${curr}${md.price.toLocaleString(isInr ? "en-IN" : "en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`
+      : "";
+
+  const market_cap_formatted =
+    md?.marketCap != null
+      ? isInr
+        ? `₹${(md.marketCap / 1e7).toFixed(0)} Cr`
+        : `$${(md.marketCap / 1e9).toFixed(1)}B`
+      : "";
+
+  return {
+    company: memo.company ?? fallbackQuery,
+    ticker,
+    sector: memo.sector ?? "",
+    price,
+    market_cap_formatted,
+    sentiment: memo.sentiment ?? "",
+    recommendation: memo.recommendation ?? "",
+    content: buildContent(memo),
+    type: memo.type ?? "public",
+  };
+}
 
 const MemoSearchForm = () => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [memoData, setMemoData] = useState<MemoData | null>(null);
+  const [memo, setMemo] = useState<PartialMemo | null>(null);
 
   const generate = useCallback(async (company: string) => {
     if (!company.trim()) return;
-    setMemoData(null);
+    setMemo(null);
     setError(false);
     setLoading(true);
 
     try {
-      const res = await fetch(WEBHOOK_URL, {
+      const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ company: company.trim() }),
       });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(errBody.error ?? `HTTP ${res.status}`);
+      }
+      if (!res.body) throw new Error("No response stream");
 
-      const raw = await res.json();
-      const data = Array.isArray(raw) ? raw[0] : raw;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
 
-      if (!data || !data.memo) throw new Error("No memo in response");
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      const recommendation = extractRecommendation(data.memo);
+        buffer += decoder.decode(value, { stream: true });
 
-      setMemoData({
-        company: data.companyName || company.trim(),
-        ticker: data.ticker || "",
-        sector: data.profile?.sector
-          ? `${data.profile.sector} · ${data.exchange || ""}`
-          : "",
-        price: data.quote?.price ? `$${data.quote.price}` : "",
-        market_cap_formatted: data.quote?.marketCap || "",
-        sentiment: data.sentiment?.label || "Neutral",
-        recommendation,
-        content: data.memo,
-      });
+        // SSE events are separated by blank lines
+        const events = buffer.split("\n\n");
+        buffer = events.pop() ?? "";
 
-      setTimeout(() => {
-        document
-          .getElementById("memo-result")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
+        for (const event of events) {
+          const line = event.trim();
+          if (!line.startsWith("data:")) continue;
+          const json = line.slice(5).trim();
+          if (!json) continue;
+
+          let partial: PartialMemo;
+          try {
+            partial = JSON.parse(json);
+          } catch {
+            continue;
+          }
+
+          if (partial._error) {
+            throw new Error(partial._error);
+          }
+
+          setMemo(partial);
+
+          if (partial._done) {
+            setLoading(false);
+            setTimeout(() => {
+              document
+                .getElementById("memo-result")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 100);
+          }
+        }
+      }
     } catch {
       setError(true);
     } finally {
@@ -102,6 +159,9 @@ const MemoSearchForm = () => {
   const handleRetry = () => {
     if (query.trim()) generate(query);
   };
+
+  // Show the memo card as soon as the first section arrives
+  const hasContent = !!memo?.sections?.executiveSummary;
 
   return (
     <div className="w-full">
@@ -125,7 +185,7 @@ const MemoSearchForm = () => {
         </div>
       </form>
 
-      {!loading && !error && (
+      {!loading && !error && !hasContent && (
         <p className="mt-4 font-sans text-[14px] text-ink-muted">
           Try:{" "}
           {EXAMPLE_CHIPS.map((name, i) => (
@@ -147,17 +207,21 @@ const MemoSearchForm = () => {
         </p>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && !hasContent && (
         <p className="mt-10 label-eyebrow text-[10px] text-ink-muted">
           Free to use · No signup · Covers public and private companies
         </p>
       )}
 
-      {loading && <LoadingState />}
+      {/* Loading — show until the first section text arrives */}
+      {loading && !hasContent && <LoadingState />}
+
       {error && !loading && <ErrorState onRetry={handleRetry} />}
-      {memoData && !loading && !error && (
+
+      {/* Result — renders progressively as sections fill in */}
+      {hasContent && (
         <div id="memo-result">
-          <MemoResult data={memoData} />
+          <MemoResult data={memoToMemoData(memo!, query)} />
         </div>
       )}
     </div>
